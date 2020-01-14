@@ -18,17 +18,22 @@ for i in xrange(len(u.trajectory)):
     individual_density=np.where(output_var<=6, 1, 0)
     transformed.append(individual_density)
 
+# establish the empty matrix that will contain the pre-normalised density matrix
 density_matrix = []
-# for i in xrange(len(prot_CA)):
+#This for loop is generating and i that corrosponds to the row to analyse
 for i in xrange(len(prot_CA)):
+    # This is a temporary matrix where you store the i-th row for every consecutive frame. Each element in these rows will then
+    # be added to make one row, before then being refreshed for storing the next row in the series.
     calc_matrix=[]
     for frame in transformed:
+        # Append the i-th row of all frames to 'calc_matrix'
         calc_matrix.append(frame[i])
-        # print(len(frame))
-        # print(frame)
-    # print(calc_matrix)
+
+    # make 'calc_matrix' a numpy array so that it can be summed
     calc_matrix=np.array(calc_matrix)
+    # add each connected element in every row and save to make a single 'row'
     row=calc_matrix.sum(axis=0)
+    # append this variable to the density matrix
     density_matrix.append(row)
     
 print(density_matrix)
