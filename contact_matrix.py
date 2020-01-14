@@ -10,9 +10,6 @@ for ts in u.trajectory:
     all_coords.append(prot_CA.positions)
 
 transformed = []
-# uncomment below line and re comment the next when test is complete
-# for i in xrange(len(u.trajectory)):
-# for i in xrange(len(prot_CA)):
 for i in xrange(len(u.trajectory)):
     output_var=mda.lib.distances.distance_array(all_coords[i], all_coords[i])
     individual_density=np.where(output_var<=6, 1, 0)
@@ -35,5 +32,5 @@ for i in xrange(len(prot_CA)):
     row=calc_matrix.sum(axis=0)
     # append this variable to the density matrix
     density_matrix.append(row)
-    
+
 print(density_matrix)
