@@ -1,6 +1,7 @@
 import MDAnalysis as mda
 import random
 import numpy as np
+import matplotlib.pyplot as plt
 u = mda.Universe('r1_prot.gro','r1_prot.xtc')
 
 #atom selection for c-alphas
@@ -10,9 +11,15 @@ for ts in u.trajectory:
     all_coords.append(prot_CA.positions)
 
 transformed = []
+# Generates a new matrix for all contacts over every frame where distances are replaced with either a 0 or 1
+# depending on if they meet the critera of being above or below 6 Angstroms.
 for i in xrange(len(u.trajectory)):
+    # MDAnalysis function to generate a per-residue distance matrix.
     output_var=mda.lib.distances.distance_array(all_coords[i], all_coords[i])
+    # If the distance is below 6 angstroms then replace the distance with a 1.
+    # If the distance is above 6 angstroms then replace the distance with a 0.
     individual_density=np.where(output_var<=6, 1, 0)
+    # Append this transformed distance matrix to the array.
     transformed.append(individual_density)
 
 # establish the empty matrix that will contain the pre-normalised density matrix
@@ -34,3 +41,20 @@ for i in xrange(len(prot_CA)):
     density_matrix.append(row)
 
 print(density_matrix)
+
+# Plotting information
+
+fig = plt.figure(figsize=(6, 3.2))
+
+ax = fig.add_subplot(111)
+ax.set_title('colorMap')
+plt.imshow(density_matrix)
+ax.set_aspect('equal')
+
+cax = fig.add_axes([0.12, 0.1, 0.78, 0.8])
+cax.get_xaxis().set_visible(False)
+cax.get_yaxis().set_visible(False)
+cax.patch.set_alpha(0)
+cax.set_frame_on(False)
+plt.colorbar(orientation='vertical')
+plt.show()
