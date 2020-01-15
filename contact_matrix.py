@@ -51,20 +51,32 @@ for i in xrange(len(prot_CA)):
     normalised_matrix.append(pre_norm_matrix)
 normalised_matrix=np.array(normalised_matrix)
 
-# Plotting information
-fig = plt.figure(figsize=(6, 3.2))
-ax = fig.add_subplot(111)
-ax.set_title('Contact Density')
-# plt.imshow(density_matrix)
-plt.imshow(normalised_matrix)
-ax.set_aspect('equal')
-cax = fig.add_axes([0.12, 0.1, 0.78, 0.8])
-cax.get_xaxis().set_visible(False)
-cax.get_yaxis().set_visible(False)
-cax.patch.set_alpha(0)
-cax.set_frame_on(False)
-# Set these axis to zoom in on different parts of the graph
-# ax.set_xlim(0, 250)
-# ax.set_ylim(250, 435)
-plt.colorbar(orientation='vertical')
-plt.show()
+# # Under construction:
+# # Give a table of residue pairs that are above a certain % cut-off.
+# # This will tell you what residues are important in forming contacts.
+# file=open("testfile.txt","w")
+# list_contacts=[]
+# for i in xrange(len(prot_CA)):
+#     sublist_contacts = []
+#     for j in xrange(len(prot_CA)):
+#         if normalised_matrix[i][j]>=95:
+#             file.write(str(i+1)+ " and " +str(j+1)+ "\n")
+# file.close()
+
+# # Plotting information
+# fig = plt.figure(figsize=(6, 3.2))
+# ax = fig.add_subplot(111)
+# ax.set_title('Contact Density')
+# # plt.imshow(density_matrix)
+# plt.imshow(normalised_matrix)
+# ax.set_aspect('equal')
+# cax = fig.add_axes([0.12, 0.1, 0.78, 0.8])
+# cax.get_xaxis().set_visible(False)
+# cax.get_yaxis().set_visible(False)
+# cax.patch.set_alpha(0)
+# cax.set_frame_on(False)
+# # Set these axis to zoom in on different parts of the graph
+# # ax.set_xlim(0, 250)
+# # ax.set_ylim(250, 435)
+# plt.colorbar(orientation='vertical')
+# plt.show()
