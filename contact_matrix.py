@@ -17,8 +17,8 @@ transformed = []
 for i in xrange(len(u.trajectory)):
     # MDAnalysis function to generate a per-residue distance matrix.
     output_var=mda.lib.distances.distance_array(all_coords[i], all_coords[i])
-    # If the distance is below 6 angstroms then replace the distance with a 1.
-    # If the distance is above 6 angstroms then replace the distance with a 0.
+    # If the distance is below 10 angstroms then replace the distance with a 1.
+    # If the distance is above 10 angstroms then replace the distance with a 0.
     individual_density=np.where(output_var<=10, 1, 0)
     # Append this transformed distance matrix to the array.
     transformed.append(individual_density)
