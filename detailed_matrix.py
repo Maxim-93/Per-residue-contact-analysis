@@ -151,6 +151,9 @@ for i in range(0, int(x)-2):
 
 print(set(list_contacts))
 
+# As MacPyMOL embeds Python directly, you cannot take this list of contacts and put them into pymol within
+# this script. You will need to print them out and place them into a .pml file.
+
 # Plotting information
 # fig = plt.figure(figsize=(6, 3.2))
 # ax = fig.add_subplot(111)
