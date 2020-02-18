@@ -116,34 +116,55 @@ for i in range(0, prot.n_residues-1):
     normalised_matrix.append(pre_norm_matrix)
 normalised_matrix=np.array(normalised_matrix)
 
-# print(normalised_matrix)
-#
+
 # # # Under construction:
 # # # Give a table of residue pairs that are above a certain % cut-off.
 # # # This will tell you what residues are important in forming contacts.
-# # file=open("testfile.txt","w")
-# # list_contacts=[]
-# # for i in xrange(len(prot_CA)):
-# #     sublist_contacts = []
-# #     for j in xrange(len(prot_CA)):
-# #         if normalised_matrix[i][j]>=95:
-# #             file.write(str(i+1)+ " and " +str(j+1)+ "\n")
-# # file.close()
+
+
+# Go through normalised matrix, if normalised_matrix[i][j] => 70 , append i+1 and j+1 to a list
+# Ok, this works but there is alot of redundancy in the list. Must figure out how to remove repeated and self-matching pairs of residues.
+# Also, perhaps rather than listing the pairs explicitly- just list the amino acids that make these contacts themselves.
+# file=open("testfile.txt","w")
+# list_contacts=[]
+# for i in range(0, prot.n_residues-1):
+#     sublist_contacts = []
+#     for j in range(0, prot.n_residues-1):
+#         if normalised_matrix[i][j]>=70:
+#             file.write(str(i+1)+ " and " +str(j+1)+ "\n")
+#
+# file.close()
+
+# For this to work properly, you need to specify what reisdues corrospond to each chain. This way, you can remove all residues that interact with
+# other residues in the same chain.
+list_contacts=[]
+
+# Create an input for where chain 2 starts.
+print('Enter beginning residue number of the second protein chain:')
+x = input()
+# For test.gro, this is 213
+for i in range(0, int(x)-2):
+    for j in range(int(x)-2, prot.n_residues-1):
+        if normalised_matrix[i][j]>=70:
+            list_contacts.append(i)
+            list_contacts.append(j)
+
+print(set(list_contacts))
 
 # Plotting information
-fig = plt.figure(figsize=(6, 3.2))
-ax = fig.add_subplot(111)
-ax.set_title('Contact Density')
-# plt.imshow(density_matrix)
-plt.imshow(normalised_matrix)
-ax.set_aspect('equal')
-cax = fig.add_axes([0.12, 0.1, 0.78, 0.8])
-cax.get_xaxis().set_visible(False)
-cax.get_yaxis().set_visible(False)
-cax.patch.set_alpha(0)
-cax.set_frame_on(False)
-# Set these axis to zoom in on different parts of the graph
-# ax.set_xlim(0, 250)
-# ax.set_ylim(250, 435)
-plt.colorbar(orientation='vertical')
-plt.show()
+# fig = plt.figure(figsize=(6, 3.2))
+# ax = fig.add_subplot(111)
+# ax.set_title('Contact Density')
+# # plt.imshow(density_matrix)
+# plt.imshow(normalised_matrix)
+# ax.set_aspect('equal')
+# cax = fig.add_axes([0.12, 0.1, 0.78, 0.8])
+# cax.get_xaxis().set_visible(False)
+# cax.get_yaxis().set_visible(False)
+# cax.patch.set_alpha(0)
+# cax.set_frame_on(False)
+# # Set these axis to zoom in on different parts of the graph
+# # ax.set_xlim(0, 250)
+# # ax.set_ylim(250, 435)
+# plt.colorbar(orientation='vertical')
+# plt.show()
