@@ -11,6 +11,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 import re
+from Bio import AlignIO
 u = mda.Universe('test.gro','r1_prot.xtc')
 
 # A word of caution... Make sure that your .gro file protein numbering is
@@ -121,20 +122,6 @@ normalised_matrix=np.array(normalised_matrix)
 # # # Give a table of residue pairs that are above a certain % cut-off.
 # # # This will tell you what residues are important in forming contacts.
 
-
-# Go through normalised matrix, if normalised_matrix[i][j] => 70 , append i+1 and j+1 to a list
-# Ok, this works but there is alot of redundancy in the list. Must figure out how to remove repeated and self-matching pairs of residues.
-# Also, perhaps rather than listing the pairs explicitly- just list the amino acids that make these contacts themselves.
-# file=open("testfile.txt","w")
-# list_contacts=[]
-# for i in range(0, prot.n_residues-1):
-#     sublist_contacts = []
-#     for j in range(0, prot.n_residues-1):
-#         if normalised_matrix[i][j]>=70:
-#             file.write(str(i+1)+ " and " +str(j+1)+ "\n")
-#
-# file.close()
-
 # For this to work properly, you need to specify what reisdues corrospond to each chain. This way, you can remove all residues that interact with
 # other residues in the same chain.
 list_contacts=[]
@@ -154,6 +141,8 @@ print(set(list_contacts))
 # As MacPyMOL embeds Python directly, you cannot take this list of contacts and put them into pymol within
 # this script. You will need to print them out and place them into a .pml file.
 
+# Perhaps use Sys to open pymol and execute the generated pymol script. Will need to get this script to create the pymol script...
+
 # Plotting information
 # fig = plt.figure(figsize=(6, 3.2))
 # ax = fig.add_subplot(111)
@@ -171,3 +160,15 @@ print(set(list_contacts))
 # # ax.set_ylim(250, 435)
 # plt.colorbar(orientation='vertical')
 # plt.show()
+
+# Look for conserved sequences in obligate heteropentamers that are not conserved
+# in obligate homopentamers. ID residues and validate against 3D structure.
+
+# Look at sequence alignments of each subunit in each species.
+# Find differences between conserved areas of heteromers where homomers are
+# onserved. Then, compare conserved residues between subunit pairs to identify
+# potential residues. Once you’ve ID’d potential residues- compare this
+# (or “train” this) against 3D structure of two contacting subunits.
+# Those residues that are conserved and within x distance will be deemed 
+# ‘important stoichiometric indicator’ (ISI).
+align = AlignIO.read("gamma_MSA.clw", "clustal")
