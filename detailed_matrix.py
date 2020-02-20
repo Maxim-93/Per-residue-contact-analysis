@@ -12,6 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import re
 from Bio import AlignIO
+from Bio import SeqIO
 u = mda.Universe('test.gro','r1_prot.xtc')
 
 # A word of caution... Make sure that your .gro file protein numbering is
@@ -144,22 +145,22 @@ print(set(list_contacts))
 # Perhaps use Sys to open pymol and execute the generated pymol script. Will need to get this script to create the pymol script...
 
 # Plotting information
-# fig = plt.figure(figsize=(6, 3.2))
-# ax = fig.add_subplot(111)
-# ax.set_title('Contact Density')
-# # plt.imshow(density_matrix)
-# plt.imshow(normalised_matrix)
-# ax.set_aspect('equal')
-# cax = fig.add_axes([0.12, 0.1, 0.78, 0.8])
-# cax.get_xaxis().set_visible(False)
-# cax.get_yaxis().set_visible(False)
-# cax.patch.set_alpha(0)
-# cax.set_frame_on(False)
-# # Set these axis to zoom in on different parts of the graph
-# # ax.set_xlim(0, 250)
-# # ax.set_ylim(250, 435)
-# plt.colorbar(orientation='vertical')
-# plt.show()
+fig = plt.figure(figsize=(6, 3.2))
+ax = fig.add_subplot(111)
+ax.set_title('Contact Density')
+# plt.imshow(density_matrix)
+plt.imshow(normalised_matrix)
+ax.set_aspect('equal')
+cax = fig.add_axes([0.12, 0.1, 0.78, 0.8])
+cax.get_xaxis().set_visible(False)
+cax.get_yaxis().set_visible(False)
+cax.patch.set_alpha(0)
+cax.set_frame_on(False)
+# Set these axis to zoom in on different parts of the graph
+# ax.set_xlim(0, 250)
+# ax.set_ylim(250, 435)
+plt.colorbar(orientation='vertical')
+plt.show()
 
 # Look for conserved sequences in obligate heteropentamers that are not conserved
 # in obligate homopentamers. ID residues and validate against 3D structure.
@@ -169,6 +170,11 @@ print(set(list_contacts))
 # onserved. Then, compare conserved residues between subunit pairs to identify
 # potential residues. Once you’ve ID’d potential residues- compare this
 # (or “train” this) against 3D structure of two contacting subunits.
-# Those residues that are conserved and within x distance will be deemed 
+# Those residues that are conserved and within x distance will be deemed
 # ‘important stoichiometric indicator’ (ISI).
-align = AlignIO.read("gamma_MSA.clw", "clustal")
+
+# align_obligate_homomers = AlignIO.read(".clw", "clustal")
+# align_gamma = AlignIO.read("gamma_MSA.clw", "clustal")
+# align_delta = AlignIO.read("delta_MSA.clw", "clustal")
+# align_epsilon = AlignIO.read("epsilon_MSA.clw", "clustal")
+# align_heteromer = AlignIO.read("gam_del_epss.clw", "clustal")
