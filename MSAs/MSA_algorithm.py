@@ -12,6 +12,7 @@
 from Bio.Seq import Seq
 from Bio import AlignIO
 from Bio.SeqRecord import SeqRecord
+import collections
 
 align_obligate_homomer = AlignIO.read("alpha7_approved_MSA.clw", "clustal")
 align_gamma = AlignIO.read("gamma_approved_MSA.clw", "clustal")
@@ -59,12 +60,27 @@ gamma_block=reorder_subs(subunit_orders=gamma)
 # slice through each column for a particular subunit block and calculate conservation
 # for that point. Need to find a condition where if the character is an indel, give NA
 # rather than an actual conservation score.
-
+global_array=[]
 for i in range(len(alpha7_block[0])):
-    print('break')
+    temp_array=[]
     for j in range(len(alpha7_block)):
-        print(align_all[j][i])
+        temp_array.append(align_all[j][i])
+    # print(temp_array)
+    global_array.append(temp_array)
 
+for i in global_array:
+    # print(i)
+    frequencies = collections.Counter(i)
+    print(frequencies)
+# print(global_array)
+
+
+# You need to update  this block of code to something more sophisticated.
+# https://onlinelibrary.wiley.com/doi/full/10.1002/prot.10146#bib18
+# contains information on conservation scores.
+# What you want to do is make a function that uses the Zvelibil description.
+# V_{zvelibil}=n_{const} * 1/10 (This is sort of a latex format for this equation)
+# You need to take the 'truth table' and store it as a kind of Dictionary
 
 # alpha7=align_all[0:homomer_length]
 # delta=align_all[homomer_length:homomer_length+delta_length]
