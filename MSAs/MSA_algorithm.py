@@ -87,9 +87,12 @@ for i in range(len(alpha7_block[0])):
         temp_array.append(align_all[j][i])
     global_array.append(temp_array)
 
+
 conservation_dictionary = []
 for i in global_array:
+    # print(i)
     frequencies = collections.Counter(i)
+    # print(frequencies)
     conservation_dictionary.append(collections.Counter(i))
 
 def assign_score(subunit):
@@ -108,29 +111,42 @@ a7_conservation =assign_score(subunit='alpha7')
 eps_conservation=assign_score(subunit='epsilon')
 gam_conservation=assign_score(subunit='gamma')
 
-# print(len(del_conservation[0]))
-# print(len(a7_conservation[0]))
-# print(len(eps_conservation[0]))
-# print(len(gam_conservation[0]))
-
 # for i, score in enumerate(del_conservation[0]):
     # print(score)
     # print(i)
-print(conservation_dictionary)
+# print(conservation_dictionary)
 
-k=0
+# print(len(alpha7_block))
+
+# k=0
+# for i in conservation_dictionary:
+    # print(str(i['-']))
+    # print(i)
+    # print(len(alpha7_block))
+    # The following line is a condition that says if that part of
+    # the dictionary is equal to Counter({'-': 6}), then don't iterate K.
+    # This should allow you to match your conservation score with the position of the alignment
+    # NB. This will only work with an alignment of 6 rows. You should change it such that the numbering
+    # is generalised to corrospond with the total length of the rows.
+    # Change 'alpha7_block' to the function variable.
+    # if i['-']==str(len(alpha7_block)):
+    #     print('oooookaaaay')
+    # else:
+    #     k=k+1
+    # #     # print(del_conservation[0][k+1])
+    # print(k)
+
+# attribute_number=[]
+h=0
 for i in conservation_dictionary:
-    # print(str(i))
-    if i==conservation_dictionary[int(len(conservation_dictionary)-1)]:
-        print('oooookaaaay')
-    else:
-        # print('do something else'
-        k=k+1
-        print(del_conservation[0][k+1])
-    print(k)
-# for record in align_all:
-#     print(record.seq[:,0] + " " + record.id)
-#     print(record.seq[0:9])
+    elements=conservation_dictionary[h].elements()
+    print(elements)
+    for value in elements:
+        if value=='-' and i['-']==6:
+            print(value)
+        else:
+            h=h+1
+            # append the global position and conservation score to a dictionary
 
 # You need to update  this block of code to something more sophisticated.
 # https://onlinelibrary.wiley.com/doi/full/10.1002/prot.10146#bib18
