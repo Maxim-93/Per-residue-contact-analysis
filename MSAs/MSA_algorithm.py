@@ -36,9 +36,7 @@ def subunit_orders(subunit):
     orders=[]
     j=0
     for i in align_all:
-        # print(i)
         align_string=str([i])
-        # print(align_string)
         j=j+1
         if str(subunit) in align_string:
             orders.append(j)
@@ -61,7 +59,7 @@ alpha7_block=reorder_subs(subunit_orders=alpha7,subunit_name="alpha7")
 delta_block=reorder_subs(subunit_orders=delta,subunit_name="delta")
 epsilon_block=reorder_subs(subunit_orders=epsilon,subunit_name="epsilon")
 gamma_block=reorder_subs(subunit_orders=gamma,subunit_name="gamma")
-# print(alpha7_block[1].seq)
+print(delta_block[1].seq)
 
 # def conservation_score():
 #     for index, record in enumerate(subunit_block):
@@ -90,7 +88,6 @@ for i in range(len(alpha7_block[0])):
 conservation_dictionary = []
 for i in global_array:
     frequencies = collections.Counter(i)
-    # print(frequencies)
     conservation_dictionary.append(collections.Counter(i))
 print(conservation_dictionary)
 
@@ -127,7 +124,14 @@ def skip_number(subunit_length):
     return(gap_positions)
 
 a7_skip=skip_number(subunit_length=len(alpha7_block))
+del_skip=skip_number(subunit_length=len(delta_block))
+eps_skip=skip_number(subunit_length=len(epsilon_block))
+gam_skip=skip_number(subunit_length=len(gamma_block))
+
 print(a7_skip)
+print(del_skip)
+print(eps_skip)
+print(gam_skip)
 
 # You need to update  this block of code to something more sophisticated.
 # https://onlinelibrary.wiley.com/doi/full/10.1002/prot.10146#bib18
