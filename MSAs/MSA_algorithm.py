@@ -27,7 +27,6 @@ align_all = AlignIO.read("approved_MSA.clw", "clustal")
 
 # 1) load in alignments of both heteromer and obligate homomers
 #  and combined alignments
-
 # 2) get index ranges of each subunit and place them in individual groups
 
 # As MSAs can become disordered- the following function will obtain the order your seqeunces occur in so that they can be
@@ -59,7 +58,9 @@ alpha7_block=reorder_subs(subunit_orders=alpha7,subunit_name="alpha7")
 delta_block=reorder_subs(subunit_orders=delta,subunit_name="delta")
 epsilon_block=reorder_subs(subunit_orders=epsilon,subunit_name="epsilon")
 gamma_block=reorder_subs(subunit_orders=gamma,subunit_name="gamma")
-print(delta_block[1].seq)
+# print(delta_block[0].seq)
+# print(delta_block)
+print(alpha7_block)
 
 # def conservation_score():
 #     for index, record in enumerate(subunit_block):
@@ -78,21 +79,45 @@ print(delta_block[1].seq)
 #
 # Get conservation score, if Counter({'-': 6}) skip that iteration.
 # if not Counter({'-': 6}), apply that conservation score to that dictionary element
-global_array=[]
-for i in range(len(alpha7_block[0])):
-    temp_array=[]
-    for j in range(len(alpha7_block)):
-        temp_array.append(align_all[j][i])
-    global_array.append(temp_array)
 
-conservation_dictionary = []
-for i in global_array:
-    frequencies = collections.Counter(i)
-    conservation_dictionary.append(collections.Counter(i))
-print(conservation_dictionary)
+def cons_dict(subunit):
+    global_array=[]
+    for i in range(len(subunit[0])):
+        temp_array=[]
+        for j in range(len(subunit)):
+            temp_array.append(align_all[j][i])
+        global_array.append(temp_array)
+    conservation_dictionary = []
+    for i in global_array:
+        frequencies = collections.Counter(i)
+        conservation_dictionary.append(collections.Counter(i))
+    return(conservation_dictionary)
+
+a7_cons_dict=cons_dict(subunit=alpha7_block)
+d_cons_dict=cons_dict(subunit=delta_block)
+e_cons_dict=cons_dict(subunit=epsilon_block)
+g_cons_dict=cons_dict(subunit=gamma_block)
+# print(a7_cons_dict)
+# print(d_cons_dict)
+# print(e_cons_dict)
+# print(g_cons_dict)
+
+# global_array=[]
+# for i in range(len(alpha7_block[0])):
+#     temp_array=[]
+#     for j in range(len(alpha7_block)):
+#         temp_array.append(align_all[j][i])
+#     global_array.append(temp_array)
+# print(global_array)
+# conservation_dictionary = []
+# for i in global_array:
+#     frequencies = collections.Counter(i)
+#     conservation_dictionary.append(collections.Counter(i))
+# print(len(conservation_dictionary))
+# print(len(conservation_dictionary))
 
 def assign_score(subunit):
-    # os.remove('%s'%subunit+'.txt')
+    os.remove('%s'%subunit+'.txt')
     conservation=[]
     os.system("java -jar compbio-conservation-1.1.jar -i=%s_approved_MSA.clw -m=TAYLOR_GAPS -o=%s.txt" % (subunit, subunit))
     with open("%s.txt" % subunit, "r") as file:
@@ -109,29 +134,43 @@ gam_conservation=assign_score(subunit='gamma')
 
 # determine what residues of the global alignment to skip over for that particular subbunit block
 # when attributing a conservation score to the non-global alignment
-def skip_number(subunit_length):
+def skip_number(subunit_length, subunit):
     gap_positions=[]
     h=0
     for i in conservation_dictionary:
-        # print(h)
+        print(h)
         elements=conservation_dictionary[h].elements()
         # print(elements)
         for value in elements:
+            # print(value)
             if value=='-' and i['-']==subunit_length:
                 gap_positions.append(h)
         h=h+1
     gap_positions =list(dict.fromkeys(gap_positions))
     return(gap_positions)
+# a7_skip=skip_number(subunit_length=len(alpha7_block), subunit=a7_conservation)
+# del_skip=skip_number(subunit_length=len(delta_block), subunit=del_conservation)
+# eps_skip=skip_number(subunit_length=len(epsilon_block), subunit=eps_conservation)
+# gam_skip=skip_number(subunit_length=len(gamma_block), subunit=gam_conservation)
+# print(a7_skip)
 
-a7_skip=skip_number(subunit_length=len(alpha7_block))
-del_skip=skip_number(subunit_length=len(delta_block))
-eps_skip=skip_number(subunit_length=len(epsilon_block))
-gam_skip=skip_number(subunit_length=len(gamma_block))
+# gap_positions=[]
+# h=0
+# for i in conservation_dictionary:
+#     # print(h)
+#     elements=conservation_dictionary[h].elements()
+#     # print(elements)
+#     for value in elements:
+#         if value=='-' and i['-']==len(alpha7_block):
+#             gap_positions.append(h)
+#     h=h+1
+# gap_positions =list(dict.fromkeys(gap_positions))
+# print(gap_positions)
 
-print(a7_skip)
-print(del_skip)
-print(eps_skip)
-print(gam_skip)
+# print(a7_skip)
+# print(del_skip)
+# print(eps_skip)
+# print(gam_skip)
 
 # You need to update  this block of code to something more sophisticated.
 # https://onlinelibrary.wiley.com/doi/full/10.1002/prot.10146#bib18
