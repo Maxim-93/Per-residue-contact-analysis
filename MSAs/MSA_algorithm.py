@@ -8,16 +8,15 @@
 # (or “train” this) against 3D structure of two contacting subunits.
 # Those residues that are conserved and within x distance will be deemed
 # ‘important stoichiometric indicator’ (ISI).
-
-from Bio.Seq import Seq
-from Bio import AlignIO
-from Bio.SeqRecord import SeqRecord
 import collections
 import numpy as np
 from Bio import SeqIO
 import os
 import subprocess
 import time
+from Bio.Seq import Seq
+from Bio import AlignIO
+from Bio.SeqRecord import SeqRecord
 
 align_obligate_homomer = AlignIO.read("alpha7_approved_MSA.clw", "clustal")
 align_gamma = AlignIO.read("gamma_approved_MSA.clw", "clustal")
@@ -45,7 +44,10 @@ alpha7=subunit_orders(subunit="ACHA7")
 delta=subunit_orders(subunit="ACHD")
 epsilon=subunit_orders(subunit="ACHE")
 gamma=subunit_orders(subunit="ACHG")
-
+# for i in gamma:
+#     print(i)
+# print(alpha7[0])
+# print(delta)
 records= list(SeqIO.parse("approved_MSA.clw",'clustal'))
 def reorder_subs(subunit_orders,subunit_name):
     os.remove('%s'%subunit_name+'.fasta')
@@ -60,7 +62,7 @@ epsilon_block=reorder_subs(subunit_orders=epsilon,subunit_name="epsilon")
 gamma_block=reorder_subs(subunit_orders=gamma,subunit_name="gamma")
 # print(delta_block[0].seq)
 # print(delta_block)
-print(alpha7_block)
+# print(alpha7_block)
 
 # def conservation_score():
 #     for index, record in enumerate(subunit_block):
@@ -79,13 +81,15 @@ print(alpha7_block)
 #
 # Get conservation score, if Counter({'-': 6}) skip that iteration.
 # if not Counter({'-': 6}), apply that conservation score to that dictionary element
-
-def cons_dict(subunit):
+print(alpha7_block[0])
+def cons_dict(subunit, order):
     global_array=[]
+    #for each column, go through every row for a particular subunit and append that row to an array which can later be sorted by
+    #collections.Counter
     for i in range(len(subunit[0])):
         temp_array=[]
-        for j in range(len(subunit)):
-            temp_array.append(align_all[j][i])
+        for j in order:
+            temp_array.append(align_all[j-1][i])
         global_array.append(temp_array)
     conservation_dictionary = []
     for i in global_array:
@@ -93,28 +97,15 @@ def cons_dict(subunit):
         conservation_dictionary.append(collections.Counter(i))
     return(conservation_dictionary)
 
-a7_cons_dict=cons_dict(subunit=alpha7_block)
-d_cons_dict=cons_dict(subunit=delta_block)
-e_cons_dict=cons_dict(subunit=epsilon_block)
-g_cons_dict=cons_dict(subunit=gamma_block)
-# print(a7_cons_dict)
-# print(d_cons_dict)
-# print(e_cons_dict)
-# print(g_cons_dict)
-
-# global_array=[]
-# for i in range(len(alpha7_block[0])):
-#     temp_array=[]
-#     for j in range(len(alpha7_block)):
-#         temp_array.append(align_all[j][i])
-#     global_array.append(temp_array)
-# print(global_array)
-# conservation_dictionary = []
-# for i in global_array:
-#     frequencies = collections.Counter(i)
-#     conservation_dictionary.append(collections.Counter(i))
-# print(len(conservation_dictionary))
-# print(len(conservation_dictionary))
+print((len(epsilon_block[0])))
+a7_cons_dict=cons_dict(subunit=alpha7_block, order=alpha7)
+d_cons_dict=cons_dict(subunit=delta_block, order=delta)
+e_cons_dict=cons_dict(subunit=epsilon_block, order=epsilon)
+g_cons_dict=cons_dict(subunit=gamma_block, order= gamma)
+print(a7_cons_dict)
+print(e_cons_dict)
+print(d_cons_dict)
+print(g_cons_dict)
 
 def assign_score(subunit):
     os.remove('%s'%subunit+'.txt')
@@ -132,14 +123,18 @@ a7_conservation =assign_score(subunit='alpha7')
 eps_conservation=assign_score(subunit='epsilon')
 gam_conservation=assign_score(subunit='gamma')
 
-# determine what residues of the global alignment to skip over for that particular subbunit block
-# when attributing a conservation score to the non-global alignment
+# print(a7_conservation)
+# print(eps_conservation)
+
+# determine what residues of the global alignment to skip over for that particular subunit block
+# when attributing a conservation score to the non-global alignment.
+# looks like the problem may be with the way that cons_dict is being saved...
 def skip_number(subunit_length, subunit):
     gap_positions=[]
     h=0
-    for i in conservation_dictionary:
-        print(h)
-        elements=conservation_dictionary[h].elements()
+    for i in subunit:
+        # print(h)
+        elements=subunit[h].elements()
         # print(elements)
         for value in elements:
             # print(value)
@@ -147,12 +142,28 @@ def skip_number(subunit_length, subunit):
                 gap_positions.append(h)
         h=h+1
     gap_positions =list(dict.fromkeys(gap_positions))
+    print(gap_positions)
     return(gap_positions)
-# a7_skip=skip_number(subunit_length=len(alpha7_block), subunit=a7_conservation)
-# del_skip=skip_number(subunit_length=len(delta_block), subunit=del_conservation)
-# eps_skip=skip_number(subunit_length=len(epsilon_block), subunit=eps_conservation)
-# gam_skip=skip_number(subunit_length=len(gamma_block), subunit=gam_conservation)
+
+# print(alpha7_block)
+# print(len(alpha7_block))
+# print(a7_cons_dict)
+# a7_skip=skip_number(subunit_length=len(alpha7_block), subunit=a7_cons_dict)
+#
+#
+# print(epsilon_block)
+# print(len(epsilon_block))
+# print(e_cons_dict)
+# eps_skip=skip_number(subunit_length=len(epsilon_block), subunit=e_cons_dict)
+#
+# BUG!!! a7_skip & eps_skip and del_skip & gam_skip have the same outputs!!!
+# This cannot be correct...surely...
+# del_skip=skip_number(subunit_length=len(delta_block), subunit=d_cons_dict)
+# gam_skip=skip_number(subunit_length=len(gamma_block), subunit=g_cons_dict)
 # print(a7_skip)
+# print(del_skip)
+# print(eps_skip)
+# print(gam_skip)
 
 # gap_positions=[]
 # h=0
