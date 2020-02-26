@@ -44,10 +44,7 @@ alpha7=subunit_orders(subunit="ACHA7")
 delta=subunit_orders(subunit="ACHD")
 epsilon=subunit_orders(subunit="ACHE")
 gamma=subunit_orders(subunit="ACHG")
-# for i in gamma:
-#     print(i)
-# print(alpha7[0])
-# print(delta)
+
 records= list(SeqIO.parse("approved_MSA.clw",'clustal'))
 def reorder_subs(subunit_orders,subunit_name):
     os.remove('%s'%subunit_name+'.fasta')
@@ -60,9 +57,6 @@ alpha7_block=reorder_subs(subunit_orders=alpha7,subunit_name="alpha7")
 delta_block=reorder_subs(subunit_orders=delta,subunit_name="delta")
 epsilon_block=reorder_subs(subunit_orders=epsilon,subunit_name="epsilon")
 gamma_block=reorder_subs(subunit_orders=gamma,subunit_name="gamma")
-# print(delta_block[0].seq)
-# print(delta_block)
-# print(alpha7_block)
 
 # def conservation_score():
 #     for index, record in enumerate(subunit_block):
@@ -81,7 +75,6 @@ gamma_block=reorder_subs(subunit_orders=gamma,subunit_name="gamma")
 #
 # Get conservation score, if Counter({'-': 6}) skip that iteration.
 # if not Counter({'-': 6}), apply that conservation score to that dictionary element
-print(alpha7_block[0])
 def cons_dict(subunit, order):
     global_array=[]
     #for each column, go through every row for a particular subunit and append that row to an array which can later be sorted by
@@ -97,16 +90,13 @@ def cons_dict(subunit, order):
         conservation_dictionary.append(collections.Counter(i))
     return(conservation_dictionary)
 
-print((len(epsilon_block[0])))
 a7_cons_dict=cons_dict(subunit=alpha7_block, order=alpha7)
 d_cons_dict=cons_dict(subunit=delta_block, order=delta)
 e_cons_dict=cons_dict(subunit=epsilon_block, order=epsilon)
 g_cons_dict=cons_dict(subunit=gamma_block, order= gamma)
-print(a7_cons_dict)
-print(e_cons_dict)
-print(d_cons_dict)
-print(g_cons_dict)
 
+# This block utilises the Barton group AACon program.
+# Make a python conservation calculator in future.
 def assign_score(subunit):
     os.remove('%s'%subunit+'.txt')
     conservation=[]
@@ -123,65 +113,49 @@ a7_conservation =assign_score(subunit='alpha7')
 eps_conservation=assign_score(subunit='epsilon')
 gam_conservation=assign_score(subunit='gamma')
 
-# print(a7_conservation)
-# print(eps_conservation)
-
 # determine what residues of the global alignment to skip over for that particular subunit block
 # when attributing a conservation score to the non-global alignment.
-# looks like the problem may be with the way that cons_dict is being saved...
 def skip_number(subunit_length, subunit):
     gap_positions=[]
     h=0
     for i in subunit:
-        # print(h)
         elements=subunit[h].elements()
-        # print(elements)
         for value in elements:
-            # print(value)
             if value=='-' and i['-']==subunit_length:
                 gap_positions.append(h)
         h=h+1
     gap_positions =list(dict.fromkeys(gap_positions))
-    print(gap_positions)
+    # print(gap_positions)
     return(gap_positions)
 
-# print(alpha7_block)
-# print(len(alpha7_block))
-# print(a7_cons_dict)
-# a7_skip=skip_number(subunit_length=len(alpha7_block), subunit=a7_cons_dict)
-#
-#
-# print(epsilon_block)
-# print(len(epsilon_block))
-# print(e_cons_dict)
-# eps_skip=skip_number(subunit_length=len(epsilon_block), subunit=e_cons_dict)
-#
-# BUG!!! a7_skip & eps_skip and del_skip & gam_skip have the same outputs!!!
-# This cannot be correct...surely...
-# del_skip=skip_number(subunit_length=len(delta_block), subunit=d_cons_dict)
-# gam_skip=skip_number(subunit_length=len(gamma_block), subunit=g_cons_dict)
-# print(a7_skip)
-# print(del_skip)
-# print(eps_skip)
-# print(gam_skip)
+a7_skip=skip_number(subunit_length=len(alpha7_block), subunit=a7_cons_dict)
+eps_skip=skip_number(subunit_length=len(epsilon_block), subunit=e_cons_dict)
+del_skip=skip_number(subunit_length=len(delta_block), subunit=d_cons_dict)
+gam_skip=skip_number(subunit_length=len(gamma_block), subunit=g_cons_dict)
 
-# gap_positions=[]
-# h=0
-# for i in conservation_dictionary:
-#     # print(h)
-#     elements=conservation_dictionary[h].elements()
-#     # print(elements)
-#     for value in elements:
-#         if value=='-' and i['-']==len(alpha7_block):
-#             gap_positions.append(h)
-#     h=h+1
-# gap_positions =list(dict.fromkeys(gap_positions))
-# print(gap_positions)
+# As ?_conservation dictionary (contains the scores) only considers local alignment,
+# you need to go through the ?_conservation dictionaries and append that score to the
+# ?_cons_dict, adding a new dictionary variable 'score' and skipping this appending
+# if ?_skip number comes up. Note that ?_conservation
+# dictionary index actually starts at 1 as the 0th index is just 'TAYLOR_GAPS'
+# or whatever score you use in the AACon step.
 
-# print(a7_skip)
-# print(del_skip)
-# print(eps_skip)
-# print(gam_skip)
+# You also need to append the global conservation score to this dictionary as well.
+
+p=0
+q=1
+for i in a7_cons_dict:
+    if p not in a7_skip:
+        # a7_cons_dict[p].append(a7_conservation[0][q])
+        # a7_conservation[0][q]=a7_cons_dict[p]
+        #************************************
+        #***dict_____________to_add**********
+        #****|*****************|*************
+        #****|*****************|*************
+        a7_cons_dict[p]['local score']=a7_conservation[0][q]
+        q=q+1
+    p=p+1
+print(a7_cons_dict)
 
 # You need to update  this block of code to something more sophisticated.
 # https://onlinelibrary.wiley.com/doi/full/10.1002/prot.10146#bib18
