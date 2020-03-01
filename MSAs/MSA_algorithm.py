@@ -147,10 +147,6 @@ a7_local_dict= local_append(dictionary=a7_cons_dict,local_score=a7_conservation,
 del_local_dict=local_append(dictionary=d_cons_dict, local_score=del_conservation, skip=del_skip)
 eps_local_dict=local_append(dictionary=e_cons_dict, local_score=eps_conservation, skip=eps_skip)
 
-print(a7_local_dict)
-print(del_local_dict)
-print(eps_local_dict)
-
 # Gamma doesn't seem to work for some reason for local_append function.
 # Now that you have the local scores for each subunit, you need to
 # compare the local score of a heteromer with a homomer and output
@@ -162,6 +158,25 @@ print(eps_local_dict)
 # [1,2,7,4,-,1,2,9,5]
 # [2,-,2,1,4,7,8,5,-]
 
+def stoich_score(homomer, heteromer):
+    score=[]
+    for i in range(len(homomer)):
+        if homomer[i]['local score'] == 0 and heteromer[i]['local score'] == 0:
+            score.append('conserved gap')
+        elif homomer[i]['local score'] == 0 or heteromer[i]['local score'] == 0:
+            score.append('non conserved gap')
+        else:
+            # print(homomer[i]['local score'])
+            # print(heteromer[i]['local score'])
+            # print(int(homomer[i]['local score'])*int(heteromer[i]['local score'])
+            score.append(float(homomer[i]['local score'])*float(heteromer[i]['local score']))
+    return(score)
+
+del_stoich_score=stoich_score(homomer=a7_local_dict, heteromer=del_local_dict)
+eps_stoich_score=stoich_score(homomer=a7_local_dict, heteromer=eps_local_dict)
+
+print(eps_stoich_score)
+# print(a7_local_dict)
 
 # You need to update  this block of code to something more sophisticated.
 # https://onlinelibrary.wiley.com/doi/full/10.1002/prot.10146#bib18
