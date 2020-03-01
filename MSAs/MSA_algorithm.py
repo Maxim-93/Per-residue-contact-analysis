@@ -1,10 +1,10 @@
+
 # Look for conserved sequences in obligate heteropentamers that are not conserved
 # in obligate homopentamers. ID residues and validate against 3D structure.
-
 # Look at sequence alignments of each subunit in each species.
 # Find differences between conserved areas of heteromers where homomers are
 # onserved. Then, compare conserved residues between subunit pairs to identify
-# potential residues. Once you’ve ID’d potential residues- compare this
+# potential residues. Once you’ve id’d potential residues- compare this
 # (or “train” this) against 3D structure of two contacting subunits.
 # Those residues that are conserved and within x distance will be deemed
 # ‘important stoichiometric indicator’ (ISI).
@@ -19,7 +19,6 @@ from Bio import AlignIO
 from Bio.SeqRecord import SeqRecord
 
 align_obligate_homomer = AlignIO.read("alpha7_approved_MSA.clw", "clustal")
-align_gamma = AlignIO.read("gamma_approved_MSA.clw", "clustal")
 align_delta = AlignIO.read("delta_approved_MSA.clw", "clustal")
 align_epsilon = AlignIO.read("epsilon_approved_MSA.clw", "clustal")
 align_all = AlignIO.read("approved_MSA.clw", "clustal")
@@ -43,7 +42,6 @@ def subunit_orders(subunit):
 alpha7=subunit_orders(subunit="ACHA7")
 delta=subunit_orders(subunit="ACHD")
 epsilon=subunit_orders(subunit="ACHE")
-gamma=subunit_orders(subunit="ACHG")
 
 records= list(SeqIO.parse("approved_MSA.clw",'clustal'))
 def reorder_subs(subunit_orders,subunit_name):
@@ -56,7 +54,6 @@ def reorder_subs(subunit_orders,subunit_name):
 alpha7_block=reorder_subs(subunit_orders=alpha7,subunit_name="alpha7")
 delta_block=reorder_subs(subunit_orders=delta,subunit_name="delta")
 epsilon_block=reorder_subs(subunit_orders=epsilon,subunit_name="epsilon")
-gamma_block=reorder_subs(subunit_orders=gamma,subunit_name="gamma")
 
 # def conservation_score():
 #     for index, record in enumerate(subunit_block):
@@ -72,9 +69,7 @@ gamma_block=reorder_subs(subunit_orders=gamma,subunit_name="gamma")
 # slice through each column for a particular subunit block and calculate conservation
 # for that point. Need to find a condition where if the character is an indel, give NA
 # rather than an actual conservation score.
-#
-# Get conservation score, if Counter({'-': 6}) skip that iteration.
-# if not Counter({'-': 6}), apply that conservation score to that dictionary element
+
 def cons_dict(subunit, order):
     global_array=[]
     #for each column, go through every row for a particular subunit and append that row to an array which can later be sorted by
@@ -93,14 +88,15 @@ def cons_dict(subunit, order):
 a7_cons_dict=cons_dict(subunit=alpha7_block, order=alpha7)
 d_cons_dict=cons_dict(subunit=delta_block, order=delta)
 e_cons_dict=cons_dict(subunit=epsilon_block, order=epsilon)
-g_cons_dict=cons_dict(subunit=gamma_block, order= gamma)
 
 # This block utilises the Barton group AACon program.
 # Make a python conservation calculator in future.
 def assign_score(subunit):
     os.remove('%s'%subunit+'.txt')
     conservation=[]
-    os.system("java -jar compbio-conservation-1.1.jar -i=%s_approved_MSA.clw -m=TAYLOR_GAPS -o=%s.txt" % (subunit, subunit))
+    # os.system("java -jar compbio-conservation-1.1.jar -i=%s_approved_MSA.clw -m=TAYLOR_GAPS -o=%s.txt" % (subunit, subunit))
+    os.system("java -jar compbio-conservation-1.1.jar -i=%s_approved_MSA.clw -m=KABAT -o=%s.txt" % (subunit, subunit))
+
     with open("%s.txt" % subunit, "r") as file:
         for line in file:
             conservation.append(line)
@@ -111,7 +107,6 @@ def assign_score(subunit):
 del_conservation=assign_score(subunit='delta')
 a7_conservation =assign_score(subunit='alpha7')
 eps_conservation=assign_score(subunit='epsilon')
-gam_conservation=assign_score(subunit='gamma')
 
 # determine what residues of the global alignment to skip over for that particular subunit block
 # when attributing a conservation score to the non-global alignment.
@@ -125,13 +120,12 @@ def skip_number(subunit_length, subunit):
                 gap_positions.append(h)
         h=h+1
     gap_positions =list(dict.fromkeys(gap_positions))
-    # print(gap_positions)
+
     return(gap_positions)
 
 a7_skip=skip_number(subunit_length=len(alpha7_block), subunit=a7_cons_dict)
 eps_skip=skip_number(subunit_length=len(epsilon_block), subunit=e_cons_dict)
 del_skip=skip_number(subunit_length=len(delta_block), subunit=d_cons_dict)
-gam_skip=skip_number(subunit_length=len(gamma_block), subunit=g_cons_dict)
 
 # As ?_conservation dictionary (contains the scores) only considers local alignment,
 # you need to go through the ?_conservation dictionaries and append that score to the
@@ -139,23 +133,35 @@ gam_skip=skip_number(subunit_length=len(gamma_block), subunit=g_cons_dict)
 # if ?_skip number comes up. Note that ?_conservation
 # dictionary index actually starts at 1 as the 0th index is just 'TAYLOR_GAPS'
 # or whatever score you use in the AACon step.
-
 # You also need to append the global conservation score to this dictionary as well.
 
-p=0
-q=1
-for i in a7_cons_dict:
-    if p not in a7_skip:
-        # a7_cons_dict[p].append(a7_conservation[0][q])
-        # a7_conservation[0][q]=a7_cons_dict[p]
-        #************************************
-        #***dict_____________to_add**********
-        #****|*****************|*************
-        #****|*****************|*************
-        a7_cons_dict[p]['local score']=a7_conservation[0][q]
-        q=q+1
-    p=p+1
-print(a7_cons_dict)
+def local_append(dictionary, local_score, skip):
+    p=1
+    for i in range(0,len(dictionary)):
+        if i not in skip:
+            dictionary[i]['local score']=local_score[0][p]
+            p=p+1
+    return(dictionary)
+
+a7_local_dict= local_append(dictionary=a7_cons_dict,local_score=a7_conservation,  skip=a7_skip )
+del_local_dict=local_append(dictionary=d_cons_dict, local_score=del_conservation, skip=del_skip)
+eps_local_dict=local_append(dictionary=e_cons_dict, local_score=eps_conservation, skip=eps_skip)
+
+print(a7_local_dict)
+print(del_local_dict)
+print(eps_local_dict)
+
+# Gamma doesn't seem to work for some reason for local_append function.
+# Now that you have the local scores for each subunit, you need to
+# compare the local score of a heteromer with a homomer and output
+# another score, indicating the potential stoichiometric importance
+# of that residue.
+
+# As all gaps wont have a score, you won't be able to calculate an output
+# Need to figure a way around this. See followign lines for example.
+# [1,2,7,4,-,1,2,9,5]
+# [2,-,2,1,4,7,8,5,-]
+
 
 # You need to update  this block of code to something more sophisticated.
 # https://onlinelibrary.wiley.com/doi/full/10.1002/prot.10146#bib18
