@@ -46,28 +46,16 @@ alpha7_block=reorder_subs(subunit_orders=alpha7,subunit_name="alpha7")
 # epsilon_block=reorder_subs(subunit_orders=epsilon,subunit_name="epsilon")
 beta_block=reorder_subs(subunit_orders=beta,subunit_name="beta")
 
-
-# print(align_all[0][1])
-# for i in align_all:
-#     print(i)
 global_array=[]
 for i in range(len(align_all[0])):
     temp_array=[]
     for j in range(len(align_all)):
         temp_array.append(align_all[j][i])
-    # print(temp_array)
-        # print(align_all[j-1][i])
-        # temp_array.append(align_all[j-1][i])
-    # print(len(temp_array))
-
     global_array.append(temp_array)
-# print(len(global_array))
 conservation_dictionary=[]
 for i in global_array:
     frequencies = collections.Counter(i)
     conservation_dictionary.append(collections.Counter(i))
-print(conservation_dictionary)
-
 
 def cons_dict(subunit, order):
     global_array=[]
@@ -91,13 +79,12 @@ a7_cons_dict=cons_dict(subunit=alpha7_block, order=alpha7)
 # d_cons_dict=cons_dict(subunit=delta_block, order=delta)
 # e_cons_dict=cons_dict(subunit=epsilon_block, order=epsilon)
 b_cons_dict=cons_dict(subunit=beta_block, order=beta)
-# print(a7_cons_dict)
 
 def assign_score(subunit):
     os.remove('%s'%subunit+'.txt')
     conservation=[]
-    os.system("java -jar compbio-conservation-1.1.jar -i=%s_approved_MSA.clw -m=KABAT -o=%s.txt" % (subunit, subunit))
-
+    # os.system("java -jar compbio-conservation-1.1.jar -i=%s_approved_MSA.clw -m=KABAT -o=%s.txt" % (subunit, subunit))
+    os.system("java -jar compbio-conservation-1.1.jar -i=%s_approved_MSA.clw -m=ARMON -o=%s.txt" % (subunit, subunit))
     with open("%s.txt" % subunit, "r") as file:
         for line in file:
             conservation.append(line)
@@ -105,6 +92,7 @@ def assign_score(subunit):
     conservation=np.char.split(conservation)
     return(conservation)
 
+combined_conservation_score=assign_score(subunit='beta_a7')
 a7_conservation =assign_score(subunit='alpha7')
 # gam_conservation=assign_score(subunit='gamma')
 # eps_conservation=assign_score(subunit='epsilon')
@@ -130,17 +118,20 @@ a7_skip=skip_number(subunit_length=len(alpha7_block), subunit=a7_cons_dict)
 # del_skip=skip_number(subunit_length=len(delta_block), subunit=d_cons_dict)
 beta_skip=skip_number(subunit_length=len(beta_block), subunit=b_cons_dict)
 
-# print(delta)
-# print(delta_block)
-# print(d_cons_dict)
-# print(del_conservation[0][1])
-# print(del_skip)
+
+p=1
+for i in range(0,len(conservation_dictionary)):
+    conservation_dictionary[i]['position']=i+1
+    conservation_dictionary[i]['score']=combined_conservation_score[0][p]
+    p=p+1
+
 
 def local_append(dictionary, local_score, skip):
     p=1
     for i in range(0,len(dictionary)):
+        dictionary[i]['position']=i+1
         if i not in skip:
-            dictionary[i]['local score']=local_score[0][p]
+            dictionary[i]['score']=local_score[0][p]
             p=p+1
     return(dictionary)
 
@@ -161,16 +152,33 @@ beta_local_dict=local_append(dictionary=b_cons_dict, local_score=beta_conservati
 # subunits. You'll then want to make a comparison between the local score and this new global
 # score.
 
+# local_to_global_score=[]
+# for i in range(len(conservation_dictionary)):
+    # IF the heteromer is fully conserved (i.e 1) and
+    # homomer is fully conserved (score 1), then the stoichiometry
+    # indication score will also be 1.
+    # Therefore, the lower the score the less likely
+
+
+# print(conservation_dictionary[0]['score'])
+
+print(conservation_dictionary)
+print(beta_local_dict)
+print(a7_local_dict)
+
+
+
+
 def global_stoich_score(homomer, heteromer):
     score=[]
     for i in range(len(homomer)):
-        if homomer[i]['local score'] == 0 and heteromer[i]['local score'] == 0:
+        if homomer[i]['score'] == 0 and heteromer[i]['score'] == 0:
             score.append('conserved gap')
-        elif homomer[i]['local score'] == 0 or heteromer[i]['local score'] == 0:
+        elif homomer[i]['score'] == 0 or heteromer[i]['score'] == 0:
             score.append('non conserved gap')
         else:
-            score.append(float(homomer[i]['local score'])*float(heteromer[i]['local score']))
+            score.append(float(homomer[i]['score'])*float(heteromer[i]['score']))
     return(score)
 
-beta_stoich_score=global_stoich_score(homomer=a7_local_dict, heteromer=beta_local_dict)
+# beta_stoich_score=global_stoich_score(homomer=a7_local_dict, heteromer=beta_local_dict)
 # print(beta_stoich_score)
