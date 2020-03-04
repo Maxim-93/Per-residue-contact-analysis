@@ -83,8 +83,7 @@ b_cons_dict=cons_dict(subunit=beta_block, order=beta)
 def assign_score(subunit):
     os.remove('%s'%subunit+'.txt')
     conservation=[]
-    # os.system("java -jar compbio-conservation-1.1.jar -i=%s_approved_MSA.clw -m=KABAT -o=%s.txt" % (subunit, subunit))
-    os.system("java -jar compbio-conservation-1.1.jar -i=%s_approved_MSA.clw -m=ARMON -o=%s.txt" % (subunit, subunit))
+    os.system("java -jar compbio-conservation-1.1.jar -i=%s_approved_MSA.clw -m=KABAT -o=%s.txt" % (subunit, subunit))
     with open("%s.txt" % subunit, "r") as file:
         for line in file:
             conservation.append(line)
@@ -154,31 +153,62 @@ beta_local_dict=local_append(dictionary=b_cons_dict, local_score=beta_conservati
 
 # local_to_global_score=[]
 # for i in range(len(conservation_dictionary)):
-    # IF the heteromer is fully conserved (i.e 1) and
-    # homomer is fully conserved (score 1), then the stoichiometry
-    # indication score will also be 1.
-    # Therefore, the lower the score the less likely
-
-
+#     IF the heteromer is fully conserved (i.e 1) and
+#     homomer is fully conserved (score 1), then the stoichiometry
+#     indication score will also be 1.
+#     Therefore, the lower the score the less likely
 # print(conservation_dictionary[0]['score'])
-
+#
 print(conservation_dictionary)
 print(beta_local_dict)
 print(a7_local_dict)
+# a7_local_dict position 1 score is not being shown for some reason...
 
+# Calculate the difference between subunits by taking the difference between each subunits kabat conservation score ^2
+# This transformation should help eccentuate differences between subunits where  large devaitions would indicate
+# conserved-non-conserved pairs.
 
-
-
-def global_stoich_score(homomer, heteromer):
+# The second simultaneous scoring funciton could then copae difference and square between the local and global alignments.
+# This would tellyou if you have either conserved between subunit positions or conserved within subunits at that position.
+def get_local_stoich_score(homomer, heteromer):
     score=[]
+    compare_subs_dictionary={}
     for i in range(len(homomer)):
         if homomer[i]['score'] == 0 and heteromer[i]['score'] == 0:
             score.append('conserved gap')
+            compare_subs_dictionary[i]='conserved gap'
         elif homomer[i]['score'] == 0 or heteromer[i]['score'] == 0:
             score.append('non conserved gap')
+            compare_subs_dictionary[i]='non conserved gap'
         else:
-            score.append(float(homomer[i]['score'])*float(heteromer[i]['score']))
-    return(score)
+            score.append((float(homomer[i]['score'])-float(heteromer[i]['score']))**2)
+            # compare_subs_dictionary[i]['score']=str((float(homomer[i]['score'])-float(heteromer[i]['score']))**2)
+            compare_subs_dictionary[i]=str((float(homomer[i]['score'])**2)-(float(heteromer[i]['score'])**2))
+    # return(score)
+    return(compare_subs_dictionary, score)
 
-# beta_stoich_score=global_stoich_score(homomer=a7_local_dict, heteromer=beta_local_dict)
-# print(beta_stoich_score)
+beta_stoich_score_dict, beta_stoich_score=get_local_stoich_score(homomer=a7_local_dict, heteromer=beta_local_dict)
+print(beta_stoich_score_dict[0])
+# print(conservation_dictionary)
+
+
+
+def get_global_stoich_score(global_alignment_score, heteromer_score):
+
+    for i in range(len(global_alignment_score)):
+        # score=[]
+        if heteromer_score[i]=='non conserved gap':
+            # score.append('non conserved gap')
+            global_alignment_score[i]['global score']=='non conserved gap'
+
+        elif heteromer_score[i]=='conserved gap':
+            # score.append('conserved gap')
+            global_alignment_score[i]['global score']=='conserved gap'
+        else:
+            # score.append(int((float(global_alignment_score[i]['score'])**2)-(float(heteromer_score[i]['score'])**2)))
+            global_alignment_score[i]=str((float(global_alignment_score[i]['score'])**2)-(float(heteromer_score[i]['score'])**2))
+#     # return(score)
+#     return(compare_subs_dictionary, score)
+#
+beta_global_score_dict, beta_global_score=get_global_stoich_score(global_alignment_score=conservation_dictionary, heteromer_score=beta_stoich_score_dict)
+print(beta_global_score_dict)
