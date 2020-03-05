@@ -188,27 +188,19 @@ def get_local_stoich_score(homomer, heteromer):
     return(compare_subs_dictionary, score)
 
 beta_stoich_score_dict, beta_stoich_score=get_local_stoich_score(homomer=a7_local_dict, heteromer=beta_local_dict)
-print(beta_stoich_score_dict[0])
-# print(conservation_dictionary)
-
-
+print(beta_stoich_score_dict)
 
 def get_global_stoich_score(global_alignment_score, heteromer_score):
-
-    for i in range(len(global_alignment_score)):
-        # score=[]
+    global_score_dict={}
+    for i in range(0, len(global_alignment_score)):
         if heteromer_score[i]=='non conserved gap':
-            # score.append('non conserved gap')
-            global_alignment_score[i]['global score']=='non conserved gap'
-
+            global_score_dict[i]='non conserved gap'
         elif heteromer_score[i]=='conserved gap':
-            # score.append('conserved gap')
-            global_alignment_score[i]['global score']=='conserved gap'
+            global_score_dict[i]='non conserved gap'
         else:
-            # score.append(int((float(global_alignment_score[i]['score'])**2)-(float(heteromer_score[i]['score'])**2)))
-            global_alignment_score[i]=str((float(global_alignment_score[i]['score'])**2)-(float(heteromer_score[i]['score'])**2))
-#     # return(score)
-#     return(compare_subs_dictionary, score)
-#
-beta_global_score_dict, beta_global_score=get_global_stoich_score(global_alignment_score=conservation_dictionary, heteromer_score=beta_stoich_score_dict)
+            global_score_dict[i]=((float(global_alignment_score[i]['score'])**2)-(float(heteromer_score[i])**2))
+            # print(heteromer_score[i])
+    return(global_score_dict)
+
+beta_global_score_dict=get_global_stoich_score(global_alignment_score=conservation_dictionary, heteromer_score=beta_stoich_score_dict)
 print(beta_global_score_dict)
