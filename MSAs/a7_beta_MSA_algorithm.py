@@ -64,8 +64,6 @@ def cons_dict(subunit, order):
     for i in range(len(subunit[0])):
         temp_array=[]
         for j in order:
-            # OK THIS MIGHT BE THE ISSUE YOU WERE FACING EARLIER. CHECK BACK ON THE BELOW LINE
-            # TO SEE IF THIS IS THE SHITTY PEICE OF CODE...IT MIGHT NOT NEED A J-1!
             temp_array.append(align_all[j-1][i])
         global_array.append(temp_array)
     conservation_dictionary = []
@@ -79,11 +77,36 @@ a7_cons_dict=cons_dict(subunit=alpha7_block, order=alpha7)
 # d_cons_dict=cons_dict(subunit=delta_block, order=delta)
 # e_cons_dict=cons_dict(subunit=epsilon_block, order=epsilon)
 b_cons_dict=cons_dict(subunit=beta_block, order=beta)
+print(len(a7_cons_dict))
+print(len(b_cons_dict))
+print(len(conservation_dictionary))
+# This is the manual scoring function that you've made. Similar to kabat.
+# for i in range(len(a7_cons_dict)):
+#     print((a7_cons_dict[i].most_common()[0][1])/len(alpha7))
+
+#     printa7
+# print(a7_cons_dict)
+# print(a7_cons_dict[i].most_common()[0][1])
+# print(a7_cons_dict[2].most_common
+
+# # os.remove('%s'%subunit+'.txt')
+# conservation=[]
+# # os.system("java -jar compbio-conservation-1.1.jar -i=%s_approved_MSA.clw -m=KABAT -o=%s.txt" % (subunit, subunit))
+# os.system("java -jar compbio-conservation-1.1.jar -i=beta_a7_approved_MSA.clw -m=TAYLOR_GAPS -o=beta_a7.txt")
+
+# with open("beta_a7.txt", "r") as file:
+#     for line in file:
+#         conservation.append(line)
+# conservation=np.array(conservation)
+# conservation=np.char.split(conservation)
+# print(conservation)
 
 def assign_score(subunit):
     os.remove('%s'%subunit+'.txt')
     conservation=[]
-    os.system("java -jar compbio-conservation-1.1.jar -i=%s_approved_MSA.clw -m=KABAT -o=%s.txt" % (subunit, subunit))
+    # os.system("java -jar compbio-conservation-1.1.jar -i=%s_approved_MSA.clw -m=KABAT -o=%s.txt" % (subunit, subunit))
+    os.system("java -jar compbio-conservation-1.1.jar -i=%s_approved_MSA.clw -m=ZVELIBIL -o=%s.txt" % (subunit, subunit))
+
     with open("%s.txt" % subunit, "r") as file:
         for line in file:
             conservation.append(line)
@@ -158,7 +181,10 @@ beta_local_dict=local_append(dictionary=b_cons_dict, local_score=beta_conservati
 #     indication score will also be 1.
 #     Therefore, the lower the score the less likely
 # print(conservation_dictionary[0]['score'])
-#
+
+# for i in range(len(conservation_dictionary):
+
+
 print(conservation_dictionary)
 print(beta_local_dict)
 print(a7_local_dict)
@@ -193,14 +219,14 @@ print(beta_stoich_score_dict)
 def get_global_stoich_score(global_alignment_score, heteromer_score):
     global_score_dict={}
     for i in range(0, len(global_alignment_score)):
-        if heteromer_score[i]=='non conserved gap':
+        if heteromer_score[i]['score']=='non conserved gap':
             global_score_dict[i]='non conserved gap'
-        elif heteromer_score[i]=='conserved gap':
+        elif heteromer_score[i]['score']=='conserved gap':
             global_score_dict[i]='non conserved gap'
         else:
-            global_score_dict[i]=((float(global_alignment_score[i]['score'])**2)-(float(heteromer_score[i])**2))
+            global_score_dict[i]=((float(global_alignment_score[i]['score'])**2)-(float(heteromer_score[i]['score'])**2))
             # print(heteromer_score[i])
     return(global_score_dict)
 
-beta_global_score_dict=get_global_stoich_score(global_alignment_score=conservation_dictionary, heteromer_score=beta_stoich_score_dict)
+beta_global_score_dict=get_global_stoich_score(global_alignment_score=conservation_dictionary, heteromer_score=beta_local_dict)
 print(beta_global_score_dict)
