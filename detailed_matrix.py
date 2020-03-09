@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import re
 from Bio import AlignIO
 from Bio import SeqIO
-u = mda.Universe('test.gro','r1_prot.xtc')
+u = mda.Universe('del_beta.gro','del_bet_concat.xtc')
 
 # A word of caution... Make sure that your .gro file protein numbering is
 # set so that resnumbers don't skip.
@@ -144,6 +144,9 @@ print(set(list_contacts))
 
 # Perhaps use Sys to open pymol and execute the generated pymol script. Will need to get this script to create the pymol script...
 
+prot=u.select_atoms('protein')
+y=prot.resids[-1]
+
 # Plotting information
 fig = plt.figure(figsize=(6, 3.2))
 ax = fig.add_subplot(111)
@@ -157,8 +160,8 @@ cax.get_yaxis().set_visible(False)
 cax.patch.set_alpha(0)
 cax.set_frame_on(False)
 # Set these axis to zoom in on different parts of the graph
-# ax.set_xlim(0, 250)
-# ax.set_ylim(250, 435)
+# ax.set_xlim(0, int(x)-1)
+# ax.set_ylim(int(x), int(y))
 plt.colorbar(orientation='vertical')
 plt.show()
 
