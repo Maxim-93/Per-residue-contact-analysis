@@ -137,7 +137,19 @@ for i in range(0, int(x)-2):
             list_contacts.append(i)
             list_contacts.append(j)
 
-print(set(list_contacts))
+print("Delta residues")
+delta_residues=[]
+for i in list_contacts:
+    if i < int(x)+1:
+        delta_residues.append(i)
+print(delta_residues)
+
+print("Beta residues")
+beta_residues=[]
+for i in list_contacts:
+    if i >= int(x):
+        beta_residues.append(i)
+print(beta_residues)
 
 # As MacPyMOL embeds Python directly, you cannot take this list of contacts and put them into pymol within
 # this script. You will need to print them out and place them into a .pml file.
