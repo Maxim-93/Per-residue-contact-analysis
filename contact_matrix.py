@@ -3,14 +3,19 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 import re
-u = mda.Universe('r1_prot.gro','r1_prot.xtc')
+
+print('Enter beginning residue number of the second protein chain:')
+x = input()
+
+
+u = mda.Universe('del_beta.gro','del_beta_r1.xtc')
 
 #atom selection for c-alphas
 all_coords=[]
 # Will store all CA atoms in a multidimensional array of trajectory length x number of CA atoms
 for ts in u.trajectory:
-    prot_CA=u.select_atoms('name CA')
-    all_coords.append(prot_CA.positions)
+    prot_CB=u.select_atoms('name CB')
+    all_coords.append(prot_CB.positions)
 
 # print(all_coords)
 
@@ -20,18 +25,20 @@ transformed = []
 for i in range(len(u.trajectory)):
     # MDAnalysis function to generate a per-residue distance matrix.
     output_var=mda.lib.distances.distance_array(all_coords[i], all_coords[i])
-    # If the distance is below 10 angstroms then replace the distance with a 1.
-    # If the distance is above 10 angstroms then replace the distance with a 0.
-    individual_density=np.where(output_var<=10, 1, 0)
+    # If the distance is below 8 angstroms then replace the distance with a 1.
+    # If the distance is above 8 angstroms then replace the distance with a 0.
+    individual_density=np.where(output_var<=8, 1, 0)
     # Append this transformed distance matrix to the array.
     transformed.append(individual_density)
+
+print('transformed')
 
 #
 # # establish the empty matrix that will contain the pre-normalised density matrix
 density_matrix = []
 normalised_matrix = []
 #This for loop is generating and i that corrosponds to the row to analyse
-for i in range(len(prot_CA)):
+for i in range(len(transformed)):
     # This is a temporary matrix where you store the i-th row for every consecutive frame. Each element in these rows will then
     # be added to make one row, before then being refreshed for storing the next row in the series.
     calc_matrix=[]
@@ -48,15 +55,38 @@ for i in range(len(prot_CA)):
 print(len(density_matrix))
 
 # # Normalise the density matrix
-# for i in range(len(prot_CA)):
-#     pre_norm_matrix=[]
-#     for j in range(len(prot_CA)):
-#         normalise=np.where(density_matrix[i][j]<=len(u.trajectory),round(float((float(density_matrix[i][j])/float(len(u.trajectory)))*100), 2),'blank')
-#         pre_norm_matrix.append(float(normalise))
-#     pre_norm_matrix=np.array(pre_norm_matrix)
-#     normalised_matrix.append(pre_norm_matrix)
-# normalised_matrix=np.array(normalised_matrix)
-#
+for i in range(len(prot_CB)):
+    pre_norm_matrix=[]
+    for j in range(len(prot_CB)):
+        normalise=np.where(density_matrix[i][j]<=len(u.trajectory),round(float((float(density_matrix[i][j])/float(len(u.trajectory)))*100), 2),'blank')
+        pre_norm_matrix.append(float(normalise))
+    pre_norm_matrix=np.array(pre_norm_matrix)
+    normalised_matrix.append(pre_norm_matrix)
+normalised_matrix=np.array(normalised_matrix)
+
+
+list_contacts=[]
+prot=u.select_atoms('protein')
+for i in range(0, int(x)-2):
+    for j in range(int(x)-2, prot.n_residues-1):
+        if normalised_matrix[i][j]>=70:
+            list_contacts.append(i)
+            list_contacts.append(j)
+
+print("Delta residues")
+delta_residues=[]
+for i in list_contacts:
+    if i < int(x)+1:
+        delta_residues.append(i)
+print(delta_residues)
+
+print("Beta residues")
+beta_residues=[]
+for i in list_contacts:
+    if i >= int(x):
+        beta_residues.append(i)
+print(beta_residues)
+
 # # # Under construction:
 # # # Give a table of residue pairs that are above a certain % cut-off.
 # # # This will tell you what residues are important in forming contacts.
